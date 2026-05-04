@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    networks:
+      - techretail_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+
+  backend:
+    image: node:18-alpine
+    command: sh -c "while true; do echo Hello from backend; sleep 10; done"
+    networks:
+      - techretail_net
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    secrets:
+      - db_password
+
+  database:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_DATABASE: techretail_db
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - techretail_net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    secrets:
+      - db_password
+
+  cache:
+    image: redis:7-alpine
+    networks:
+      - techretail_net
+    deploy:
+      replicas: 1
+
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    networks:
+      - techretail_net
+
+networks:
+  techretail_net:
+    driver: overlay
+
+volumes:
+  db_data:
+
+secrets:
+  db_password:
+    external: true
