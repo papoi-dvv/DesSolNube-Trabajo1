@@ -13,23 +13,33 @@ Este proyecto implementa un clúster Docker Swarm para la empresa TechRetail, co
 * 1 nodo Manager
 * 2 nodos Worker
 
-┌─────────────────────────────────────────┐
-│           Docker Swarm Cluster          │
-│                                         │
-│  ┌──────────────┐                       │
-│  │   MANAGER    │ ← Leader (172.18.0.2) │
-│  │  database    │                       │
-│  │  frontend    │                       │
-│  │  visualizer  │                       │
-│  │  backend     │                       │
-│  └──────────────┘                       │
-│                                         │
-│  ┌──────────────┐  ┌──────────────┐     │
-│  │   WORKER 1   │  │   WORKER 2   │     │
-│  │  frontend x2 │  │  frontend x2 │     │
-│  │  backend     │  │  cache       │     │
-│  └──────────────┘  └──────────────┘     │
-└─────────────────────────────────────────┘
+```
+┌───────────────────────────────────────────────┐
+│           Docker Swarm Cluster                │
+│                                               │
+│   ┌───────────────────────────────┐           │
+│   │           MANAGER             │           │
+│   │  Role: Leader                │           │
+│   │                               │           │
+│   │  - database (MySQL)           │           │
+│   │  - visualizer                 │           │
+│   │  - frontend (réplicas)        │           │
+│   │  - backend (réplicas)         │           │
+│   └───────────────────────────────┘           │
+│                                               │
+│   ┌───────────────────────┐   ┌───────────────────────┐
+│   │       WORKER 1        │   │       WORKER 2        │
+│   │                       │   │                       │
+│   │  - frontend (x2)      │   │  - frontend (x2)      │
+│   │  - backend (x1)       │   │  - cache (Redis)      │
+│   │                       │   │                       │
+│   └───────────────────────┘   └───────────────────────┘
+│                                               │
+│   🔄 Comunicación: Red Overlay (techretail_net)│
+│   ⚖️ Balanceo: Docker Swarm Load Balancer      │
+└───────────────────────────────────────────────┘
+```
+
 
 ## ⚙️ Servicios
 
